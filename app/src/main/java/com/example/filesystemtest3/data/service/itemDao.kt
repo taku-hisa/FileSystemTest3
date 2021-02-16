@@ -8,10 +8,10 @@ import com.example.filesystemtest3.data.entity.item
 interface itemDao {
 
     @Query("SELECT * FROM item_table")
-    fun getLiveData(): LiveData<List<item>>
+    fun getItem(): LiveData<List<item>>
 
-    @Query("SELECT * FROM item_table WHERE category = :Category")
-    fun getItem(Category : String): List<item>
+    //@Query("SELECT * FROM item_table WHERE category = :Category")
+    //fun getItem(Category : String): LiveData<List<item>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertItem (item:item)

@@ -7,9 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.TextView
-import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
-import com.example.filesystemtest3.MainViewModel
 import com.example.filesystemtest3.databinding.FragmentMainBinding
 
 private val category = arrayOf("A","B","C","D","E")

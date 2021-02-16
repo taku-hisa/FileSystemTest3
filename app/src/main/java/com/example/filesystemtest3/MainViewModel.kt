@@ -15,13 +15,8 @@ class MainViewModel(application: Application): AndroidViewModel(application){
         val db = itemRoomDatabase.buildDatabase(application) // DBにアクセスするclassで一度だけDBをビルドする
         dao = db.itemDao() // 使用するDaoを指定
     }
-    //item
-    val getLiveData = dao.getLiveData()
 
-    //カテゴリ別の画像リストを表示する
-    fun getItem(category: String):List<item>{
-        return dao.getItem(category)
-    }
+    val getItem = dao.getItem()
 
     //Itemを保存する
     fun insertItem(item:item) {

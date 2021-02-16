@@ -15,6 +15,7 @@ import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.filesystemtest3.MainViewModel
 import com.example.filesystemtest3.adapter.itemAdapter
+import com.example.filesystemtest3.data.entity.item
 import com.example.filesystemtest3.databinding.FragmentListBinding
 
 
@@ -39,17 +40,18 @@ class ListFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        //最初の読み込み
-        setRecyclerView(args.category)
-        //追加後の読み込み
-        viewModel.getLiveData.observe( viewLifecycleOwner, Observer {
-
+        //Observer設置
+        viewModel.getItem.observe( viewLifecycleOwner, Observer {
+            setRecyclerView(it)
         })
+        binding.fab.setOnClickListener{
+            //登録処理
+        }
     }
 
-    private fun setRecyclerView (category:String) {
-        //　↓　ここでエラー　Roomは長時間UIスレッドをロックする可能性がある処理をメインスレッドでは行えないようになっている
-        val items = viewModel.getItem(args.category)
+    //RecyclerView表示処理
+    private fun setRecyclerView (items:List<item>) {
+        //Roomは長時間UIスレッドをロックする可能性がある処理をメインスレッドでは行えないようになっている
         val bitmapList = mutableListOf<Bitmap>()
         for (i in items) {
             val bitmap = BitmapFactory.decodeByteArray(i.image, 0, i.image.size)
