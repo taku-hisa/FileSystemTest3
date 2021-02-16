@@ -1,12 +1,15 @@
 package com.example.filesystemtest3.fragment
 
+import android.app.Activity
 import android.app.Activity.RESULT_OK
 import android.app.AlertDialog
+import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.util.Base64
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -21,10 +24,13 @@ import com.example.filesystemtest3.MainViewModel
 import com.example.filesystemtest3.adapter.itemAdapter
 import com.example.filesystemtest3.data.entity.item
 import com.example.filesystemtest3.databinding.FragmentListBinding
+import java.io.BufferedInputStream
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
+import java.text.SimpleDateFormat
+import java.util.*
 
-private val category = arrayOf("A","B","C","D","E") //カテゴリを定義
+private val category = arrayOf("0","1","2","3","4") //カテゴリを定義
 private var CATEGORY_CODE: Int = 42                 //カテゴリの変数
 
 class ListFragment : Fragment() {
@@ -71,11 +77,16 @@ class ListFragment : Fragment() {
 
     //RecyclerView表示処理
     private fun setRecyclerView (items:List<item>) {
-        //Roomは長時間UIスレッドをロックする可能性がある処理をメインスレッドでは行えないようになっている
+        val category = args.category
         val bitmapList = mutableListOf<Bitmap>()
+        //すべてのアイテムを取得
         for (i in items) {
-            val bitmap = BitmapFactory.decodeByteArray(i.image, 0, i.image.size)
-            bitmapList.add(bitmap)
+            if(category.equals(i.category)) {
+                val bufferedInputStream = BufferedInputStream(context?.openFileInput(i.image))
+                val itemImage = BitmapFactory.decodeStream(bufferedInputStream)
+                bufferedInputStream.close()
+                bitmapList.add(itemImage)
+            }
         }
         binding.recyclerView.apply {
             layoutManager =
@@ -118,7 +129,7 @@ class ListFragment : Fragment() {
                 val uri = resultData?.data
                 if (uri != null) {
                     //一枚選択時の動作
-                    val inputStream = getActivity()?.getContentResolver()?.openInputStream(uri)
+                    val inputStream = activity?.contentResolver?.openInputStream(uri)
                     if (inputStream != null) saveImage( inputStream, 999)
                 } else {
                     //複数枚選択時の動作
@@ -126,7 +137,7 @@ class ListFragment : Fragment() {
                     val clipItemCount = clipData?.itemCount?.minus(1) //エラーになるので、数字を１減らす。
                     for (i in 0..clipItemCount!!) {
                         val item = clipData.getItemAt(i).uri
-                        val inputStream = getActivity()?.getContentResolver()?.openInputStream(item)
+                        val inputStream = activity?.contentResolver?.openInputStream(item)
                         if (inputStream != null) saveImage( inputStream, i)
                     }
                 }
@@ -137,13 +148,19 @@ class ListFragment : Fragment() {
 
     //DB登録処理
     fun saveImage(inputStream: InputStream, int:Int) {
+        val date = Date()
+        val sdf = SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault())
+        val name : String = "${sdf.format(date)}_${int}.jpg" //画像の名前
+
         try {
             ByteArrayOutputStream().use { byteArrOutputStream ->
-                val image = BitmapFactory.decodeStream(inputStream)
-                image.compress(Bitmap.CompressFormat.JPEG, 100, byteArrOutputStream)
-                val byte = byteArrOutputStream.toByteArray()
-                insertItem(byte)
-                inputStream.close() //明示的に閉じる
+                activity?.openFileOutput(name, Context.MODE_PRIVATE).use { outStream ->
+                    val image = BitmapFactory.decodeStream(inputStream)
+                    image.compress(Bitmap.CompressFormat.JPEG, 100, outStream)
+                    outStream?.write(byteArrOutputStream.toByteArray())
+                    insertItem(name)    //DB登録処理
+                    inputStream.close() //明示的に閉じる
+                }
             }
         }catch(e:Exception){
             println("エラー発生")
@@ -151,9 +168,8 @@ class ListFragment : Fragment() {
     }
 
     //DB登録処理
-    fun insertItem(byteArray: ByteArray){
-        //エラー　行が大きすぎてCursorWindowに収まらない　→　BLOB
-        val item = item(0,CATEGORY_CODE.toString(),byteArray,"")
+    fun insertItem(name:String){
+        val item = item(0, CATEGORY_CODE.toString(),name,"")
         viewModel.insertItem(item)
     }
 

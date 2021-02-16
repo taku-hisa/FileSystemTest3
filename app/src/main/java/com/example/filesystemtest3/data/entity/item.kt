@@ -8,6 +8,6 @@ import androidx.room.*
 data class item(
     @PrimaryKey(autoGenerate = true) val id: Int,
     @ColumnInfo val category: String,
-    @ColumnInfo val image: ByteArray,
+    @ColumnInfo val image: String,
     @ColumnInfo val detail: String
 )

@@ -10,7 +10,7 @@ import android.widget.TextView
 import androidx.navigation.fragment.findNavController
 import com.example.filesystemtest3.databinding.FragmentMainBinding
 
-private val category = arrayOf("A","B","C","D","E")
+private val category = arrayOf("0","1","2","3","4")
 
 class MainFragment : Fragment() {
 
