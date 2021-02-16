@@ -1,6 +1,5 @@
 package com.example.filesystemtest3.fragment
 
-import android.app.Activity
 import android.app.Activity.RESULT_OK
 import android.app.AlertDialog
 import android.content.Context
@@ -9,12 +8,10 @@ import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
-import android.util.Base64
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
@@ -24,6 +21,9 @@ import com.example.filesystemtest3.MainViewModel
 import com.example.filesystemtest3.adapter.itemAdapter
 import com.example.filesystemtest3.data.entity.item
 import com.example.filesystemtest3.databinding.FragmentListBinding
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.io.BufferedInputStream
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
@@ -130,7 +130,10 @@ class ListFragment : Fragment() {
                 if (uri != null) {
                     //一枚選択時の動作
                     val inputStream = activity?.contentResolver?.openInputStream(uri)
-                    if (inputStream != null) saveImage( inputStream, 999)
+                    //メイン画面へ返す
+                    GlobalScope.launch(Dispatchers.IO) {
+                        if (inputStream != null) saveImage(inputStream, 999)
+                    }
                 } else {
                     //複数枚選択時の動作
                     val clipData = resultData?.clipData
@@ -138,16 +141,19 @@ class ListFragment : Fragment() {
                     for (i in 0..clipItemCount!!) {
                         val item = clipData.getItemAt(i).uri
                         val inputStream = activity?.contentResolver?.openInputStream(item)
-                        if (inputStream != null) saveImage( inputStream, i)
+                        //メイン画面へ返す
+                        GlobalScope.launch(Dispatchers.IO) {
+                            if (inputStream != null) saveImage(inputStream, i)
+                        }
                     }
                 }
-                Toast.makeText(requireContext(), "保存完了", Toast.LENGTH_LONG).show()
+                //Toast.makeText(requireContext(), "保存完了", Toast.LENGTH_LONG).show()
             }
         }
     }
 
     //DB登録処理
-    fun saveImage(inputStream: InputStream, int:Int) {
+     fun saveImage(inputStream: InputStream, int:Int) {
         val date = Date()
         val sdf = SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault())
         val name : String = "${sdf.format(date)}_${int}.jpg" //画像の名前
@@ -156,7 +162,7 @@ class ListFragment : Fragment() {
             ByteArrayOutputStream().use { byteArrOutputStream ->
                 activity?.openFileOutput(name, Context.MODE_PRIVATE).use { outStream ->
                     val image = BitmapFactory.decodeStream(inputStream)
-                    image.compress(Bitmap.CompressFormat.JPEG, 100, outStream)
+                    image.compress(Bitmap.CompressFormat.JPEG, 10, outStream)
                     outStream?.write(byteArrOutputStream.toByteArray())
                     insertItem(name)    //DB登録処理
                     inputStream.close() //明示的に閉じる
