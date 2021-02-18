@@ -54,7 +54,7 @@ class ListFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        //Observer設置
+        //viewにObserver(監視者)を置き、LiveDataの変更を検知したときはその処理を行う
         viewModel.getItem.observe( viewLifecycleOwner, Observer {
             setRecyclerView(it)
         })
@@ -130,7 +130,7 @@ class ListFragment : Fragment() {
                 if (uri != null) {
                     //一枚選択時の動作
                     val inputStream = activity?.contentResolver?.openInputStream(uri)
-                    //メイン画面へ返す
+                    //DBやファイル操作をするときは、原則別スレッドで行う
                     GlobalScope.launch(Dispatchers.IO) {
                         if (inputStream != null) saveImage(inputStream, 999)
                     }

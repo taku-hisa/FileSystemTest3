@@ -10,12 +10,12 @@ import android.widget.TextView
 import androidx.navigation.fragment.findNavController
 import com.example.filesystemtest3.databinding.FragmentMainBinding
 
-private val category = arrayOf("0","1","2","3","4")
+private val category = arrayOf("0","1","2","3","4") //カテゴリを定義
 
 class MainFragment : Fragment() {
 
-    private var _binding : FragmentMainBinding? = null
-    private val binding get() = _binding!!
+    private var _binding : FragmentMainBinding? = null //ビューバインディング
+    private val binding get() = _binding!! //ビューバインディング
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,17 +25,17 @@ class MainFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        _binding = FragmentMainBinding.inflate(inflater,container,false)
-        return binding.root
+        _binding = FragmentMainBinding.inflate(inflater,container,false) //ビューバインディング
+        return binding.root //ビューバインディング
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, category)
-        binding.listView.adapter = adapter
+        binding.listView.adapter = adapter //アダプターをセット
         binding.listView.setOnItemClickListener{parent,view,position,id->
             val item = (view.findViewById<TextView>(android.R.id.text1)).text.toString()
-            val action = MainFragmentDirections.actionMainFragmentToListFragment(item)
+            val action = MainFragmentDirections.actionMainFragmentToListFragment(item) //リストの文字を返す
             findNavController().navigate(action)
         }
     }

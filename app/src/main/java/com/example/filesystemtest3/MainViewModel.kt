@@ -17,9 +17,11 @@ class MainViewModel(application: Application): AndroidViewModel(application){
         dao = db.itemDao() // 使用するDaoを指定
     }
 
+    //LiveDataはメインスレッドで処理しなければならない
     val getItem = dao.getItem()
 
     //Itemを保存する
+    //DBやファイル操作をするときは、原則別スレッドで行う
     fun insertItem(item:item) {
         viewModelScope.launch(Dispatchers.IO) {
             dao.insertItem(item)
@@ -27,6 +29,7 @@ class MainViewModel(application: Application): AndroidViewModel(application){
     }
 
     //DBを全消去する
+    //DBやファイル操作をするときは、原則別スレッドで行う
     fun deleteAll() {
         viewModelScope.launch(Dispatchers.IO) {
             dao.deleteAll()

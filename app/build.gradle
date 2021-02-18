@@ -59,7 +59,8 @@ dependencies {
 
     //paging
     def paging_version = "2.1.2"
-    implementation "androidx.paging:paging-runtime:$paging_version" // For Kotlin use paging-runtime-ktx
+    //ktxじゃないとtoLiveDataが使えない
+    implementation "androidx.paging:paging-runtime-ktx:$paging_version" // For Kotlin use paging-runtime-ktx
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
 
     // Lifecycle components
